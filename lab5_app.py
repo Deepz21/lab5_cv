@@ -178,14 +178,14 @@ if result is not None:
                 }
                 for model_name, model_predictions in predictions.items()
             ]
-            df_summary = pd.dataframe(summary_rows)
+            df_summary = pd.DataFrame(summary_rows)
             df_summary["Confidence"] = df_summary["Confidence"].map(lambda x: f"{x:.2%}")
 
             st.subheader("Model comparison")
             st.dataframe(summary_rows, hide_index=True, width="stretch")
             # Step 9: Bar Chart
             st.bar_chart(
-                pd.dataframe(summary_rows),
+                pd.DataFrame(summary_rows),
                 x="Model",
                 y="Confidence",
                 color="Model",
