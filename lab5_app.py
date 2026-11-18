@@ -1,18 +1,21 @@
 from hashlib import sha256
 from io import BytesIO
 
+# Step 2: Import Streamlit, PyTorch, Torchvision, PIL, Pandas
 import streamlit as st
 import torch
 from PIL import Image, UnidentifiedImageError
 from torchvision import models
 import pandas as pd
 
+# Step 1: Page Title & Layout
 st.set_page_config(
     page_title="Image Classifier | PyTorch",
     page_icon="🖼️",
     layout="wide",
 )
 
+# Step 4: Load pretrained ResNet18
 MODEL_OPTIONS = {
     "ResNet-18": {
         "builder": models.resnet18,
@@ -36,9 +39,10 @@ MODEL_OPTIONS = {
     },
 }
 
+# Step 3: Run only on CPU   
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
+# Step 4: Set Model Evaluation Mode
 @st.cache_resource(show_spinner=False)
 def load_model(model_name: str, device_name: str):
     config = MODEL_OPTIONS[model_name]
@@ -46,6 +50,7 @@ def load_model(model_name: str, device_name: str):
     model = config["builder"](weights=weights)
     model.to(device_name)
     model.eval()
+    # Step 5: Recommended ResNet18 preprocessing
     return model, weights.transforms(), weights.meta["categories"]
 
 
@@ -56,8 +61,10 @@ def classify_image(image: Image.Image, model_names: list[str], top_k: int):
     for model_name in model_names:
         try:
             model, preprocess, labels = load_model(model_name, str(DEVICE))
+            # Step 7: Convert to tensor + Inference without gradients
             input_tensor = preprocess(image).unsqueeze(0).to(DEVICE)
             with torch.inference_mode():
+                # Step 8: Softmax  + top-5 with probabilities
                 probabilities = torch.softmax(model(input_tensor)[0], dim=0)
 
             scores, class_ids = torch.topk(probabilities, top_k)
@@ -110,6 +117,7 @@ image_source = st.radio(
     horizontal=True,
 )
 
+# Step 6: Upload image UI
 if image_source == "Upload an image":
     image_data = st.file_uploader(
         "Choose a JPG, PNG, or WebP image",
@@ -175,6 +183,7 @@ if result is not None:
 
             st.subheader("Model comparison")
             st.dataframe(summary_rows, hide_index=True, width="stretch")
+            # Step 9: Bar Chart
             st.bar_chart(
                 pd.dataframe(summary_rows),
                 x="Model",
