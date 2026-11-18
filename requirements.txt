@@ -7,3 +7,5 @@ torch
 torchvision
 pillow
 pandas
+hashlib
+io
